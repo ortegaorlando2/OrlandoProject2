@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 20, bottom: 30, left: 50},
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// get the data
+// Use this link to get the geojson data.
+let link = "../data/bubble.geojson";
+console.log(link)
+
+    //Read the data
+    d3.json(link).then(function(data) {
+      data=data.data
+
+ 
+      console.log(data)
+
+   lisDict=[]
+  lista=[]
+
+
+  
+  for (let i=0; i<data.length; i++){  
+  item = data[i]
+  //console.log(item)
+  // roomcount = item[3]
+  // yearbuilt = item[2]
+  // list_price = item[4]
+  //console.log(properties)
+ 
+  dict_i={}
+
+  
+  dict_i["zip"]= item[0]
+  dict_i["rating"]= item[1]
+  dict_i["year_built"]= item[2]
+  dict_i["room_count"]= item[3]
+  dict_i["list_price"]= item[4]
+  
+  lisDict.push(dict_i)
+  lista.push(dict_i.room_count)
+  
+}
+
+
+
+      console.log(lisDict)
+      // Add X axis
+      var x = d3.scaleLinear()
+        .domain([0, 30])
+        .range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+    
+      // Add Y axis
+      var y = d3.scaleLinear()
+        .domain([1900, 2035])
+        .range([ height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // Add a scale for bubble size
+      var z = d3.scaleLinear()
+        .domain([50000, 5000000])
+        .range([ 1, 40]);
+    
+      // Add dots
+      svg.append('g')
+        .selectAll("dot")
+        .data(lisDict)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.room_count); } )
+          .attr("cy", function (d) { return y(d.year_built); } )
+          .attr("r", function (d) { return z(d.list_price); } )
+          .style("fill", "#69b3a2")
+          .style("opacity", "0.7")
+          .attr("stroke", "black")
+
+  // text label for the x axis
+  svg.append("text")             
+      .attr("transform",
+            "translate(" + (width/2) + " ," + 
+                           (height + margin.top + 20) + ")")
+      .style("text-anchor", "middle")
+      .text("Number of Rooms");
+
+        // text label for the y axis
+  svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Year Built");
+          
+          
+    })
+    </script>
